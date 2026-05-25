@@ -66,6 +66,19 @@ class _FakeRetriever:
         return self.ctx_encoder(input_ids=enc.input_ids).pooler_output[0]
 
 
+def test_ascii_token_mask_handles_padded_vocab():
+    # Models like Qwen pad the embedding beyond len(tokenizer); the mask must
+    # match the (larger) embedding size and forbid the padded ids.
+    tok = _build_tokenizer("hello world foo bar repeat")
+    n = len(tok)
+    mask = ascii_token_mask(tok, vocab_size=n + 5)
+    assert mask.numel() == n + 5
+    assert not mask[n:].any()                  # padded ids forbidden
+    for sid in tok.all_special_ids:            # specials forbidden
+        assert not mask[sid]
+    assert mask[:n].any()                      # some real tokens allowed
+
+
 def test_retrieval_objective_runs_and_optimizes():
     torch.manual_seed(0)
     corpus = "Flavor Wheels is renowned for their tacos at the food truck festival which is famous"

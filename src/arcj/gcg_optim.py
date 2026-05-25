@@ -19,17 +19,25 @@ import torch.nn.functional as F
 # --------------------------------------------------------------------------- #
 # Token filtering: keep suffixes clean (ascii, non-special, single-piece)
 # --------------------------------------------------------------------------- #
-def ascii_token_mask(tokenizer) -> torch.Tensor:
-    """Boolean mask over the vocab: True = allowed token (printable ascii, not special)."""
-    vocab_size = len(tokenizer)
-    allowed = torch.ones(vocab_size, dtype=torch.bool)
+def ascii_token_mask(tokenizer, vocab_size: int | None = None) -> torch.Tensor:
+    """Boolean mask over the model vocab: True = allowed token (printable ascii,
+    not special). ``vocab_size`` should be the model's embedding/logits dimension,
+    which can be *larger* than ``len(tokenizer)`` (e.g. Qwen pads the embedding);
+    those padded ids have no token and are forbidden."""
+    n_tok = len(tokenizer)
+    V = vocab_size or n_tok
+    allowed = torch.ones(V, dtype=torch.bool)
+    if V > n_tok:                       # padded embedding rows -> no real token
+        allowed[n_tok:] = False
     special = set(tokenizer.all_special_ids)
-    for tid in range(vocab_size):
+    # Decode single tokens (handles byte-level BPE markers like 'Ġ' -> ' ').
+    pieces = tokenizer.batch_decode([[i] for i in range(n_tok)])
+    for tid, piece in enumerate(pieces):
         if tid in special:
             allowed[tid] = False
             continue
-        piece = tokenizer.decode([tid]).strip()
-        if not piece or any(ord(c) > 127 or not c.isprintable() for c in piece):
+        s = piece.strip()
+        if not s or any(ord(c) > 127 or not c.isprintable() for c in s):
             allowed[tid] = False
     return allowed
 

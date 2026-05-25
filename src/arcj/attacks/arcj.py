@@ -55,7 +55,8 @@ class ARCJAttacker(Attacker):
         self._stage2_replication(questions, llm, gcg_cfg, verbose)
 
     def _stage1_retrieval(self, questions, retriever, gcg_cfg, verbose):
-        mask = ascii_token_mask(retriever.ctx_tokenizer)
+        mask = ascii_token_mask(retriever.ctx_tokenizer,
+                                retriever.ctx_embedding_matrix.shape[0])
         for i, q in enumerate(questions):
             if verbose:
                 print(f"[ARCJ S1] retrieval suffix {i+1}/{len(questions)}")
@@ -67,7 +68,7 @@ class ARCJAttacker(Attacker):
             self.retrieval_suffixes[i] = res.suffix_text
 
     def _stage2_replication(self, questions, llm, gcg_cfg, verbose):
-        mask = ascii_token_mask(llm.tokenizer)
+        mask = ascii_token_mask(llm.tokenizer, llm.embedding_matrix.shape[0])
         init = init_suffix_ids(llm.tokenizer, gcg_cfg.replication_suffix_len)
 
         def make_obj(i, q):

@@ -21,7 +21,8 @@ class GCGAttacker(Attacker):
     def prepare(self, questions, llm=None, retriever=None, gcg_cfg=None,
                 verbose: bool = False) -> None:
         assert retriever is not None and gcg_cfg is not None
-        mask = ascii_token_mask(retriever.ctx_tokenizer)
+        mask = ascii_token_mask(retriever.ctx_tokenizer,
+                                retriever.ctx_embedding_matrix.shape[0])
         for i, q in enumerate(questions):
             if verbose:
                 print(f"[GCG] optimizing retrieval suffix {i+1}/{len(questions)}: {q.question}")
