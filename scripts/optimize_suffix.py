@@ -39,9 +39,9 @@ def main():
     questions = load_questions(os.path.join(cfg.data_dir, "questions.json"),
                                num_questions=cfg.num_questions, seed=cfg.seed)
     llm = LLM(cfg.model.llm_name, dtype=cfg.model.dtype, device=cfg.model.device,
-              load_in_4bit=cfg.model.load_in_4bit)
+              load_in_4bit=cfg.model.load_in_4bit, use_safetensors=cfg.model.use_safetensors)
     retriever = DPRRetriever(cfg.model.dpr_question_encoder, cfg.model.dpr_ctx_encoder,
-                             device=cfg.model.device)
+                             device=cfg.model.device, use_safetensors=cfg.model.use_safetensors)
 
     attacker = build_attacker(args.attack, args.arcj_mode)
     attacker.prepare(questions, llm=llm, retriever=retriever, gcg_cfg=cfg.gcg, verbose=True)

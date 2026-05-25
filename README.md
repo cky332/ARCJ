@@ -26,6 +26,10 @@ pip install -e .          # 可选：安装为可编辑包（否则脚本用内�
 - 需要 **CUDA GPU（建议 24GB+ 显存）** 来跑 7B 模型 + GCG 优化。
 - 显存不足时：在 config 里把 `model.load_in_4bit: true`（需 `bitsandbytes`），或换更小的模型。
 - `environment.yml` 默认装 CUDA 版 PyTorch；纯 CPU 只能跑流程验证，无法实跑大模型/GCG。
+- **torch 版本**：`transformers>=5` 出于安全限制（CVE-2025-32434）不再用 `torch.load` 加载
+  `.bin` 权重，需 `torch>=2.6`，但 `safetensors` 权重不受此限。代码默认 `model.use_safetensors: true`
+  强制走 safetensors（本仓库用到的 Qwen / DPR 模型都有 safetensors），所以 `torch<2.6` 也能跑。
+  若你切换到只有 `.bin` 的模型，请升级到 `torch>=2.6`。
 
 ## 2. 数据
 

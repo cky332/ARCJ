@@ -21,7 +21,7 @@ from .models import resolve_device, resolve_dtype
 class DPRRetriever:
     def __init__(self, question_encoder: str, ctx_encoder: str,
                  device: str = "auto", dtype: str = "float32",
-                 max_length: int = 256):
+                 max_length: int = 256, use_safetensors: bool = True):
         self.device = resolve_device(device)
         self.torch_dtype = resolve_dtype(dtype)
         self.max_length = max_length
@@ -29,9 +29,11 @@ class DPRRetriever:
         self.q_tokenizer = DPRQuestionEncoderTokenizerFast.from_pretrained(question_encoder)
         self.ctx_tokenizer = DPRContextEncoderTokenizerFast.from_pretrained(ctx_encoder)
         self.q_encoder = DPRQuestionEncoder.from_pretrained(
-            question_encoder, torch_dtype=self.torch_dtype).to(self.device).eval()
+            question_encoder, torch_dtype=self.torch_dtype,
+            use_safetensors=use_safetensors).to(self.device).eval()
         self.ctx_encoder = DPRContextEncoder.from_pretrained(
-            ctx_encoder, torch_dtype=self.torch_dtype).to(self.device).eval()
+            ctx_encoder, torch_dtype=self.torch_dtype,
+            use_safetensors=use_safetensors).to(self.device).eval()
         self.q_encoder.requires_grad_(False)
         self.ctx_encoder.requires_grad_(False)
         self._cache: dict[str, torch.Tensor] = {}

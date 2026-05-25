@@ -15,7 +15,7 @@ channels:
 dependencies:
   - python=3.10
   - pip
-  - pytorch>=2.1
+  - pytorch>=2.6          # transformers>=5 requires torch>=2.6 to load non-safetensors weights
   - pytorch-cuda=12.1
   - numpy
   - pip:

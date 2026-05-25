@@ -34,7 +34,8 @@ class LLM:
 
     def __init__(self, name: str, dtype: str = "float16", device: str = "auto",
                  load_in_4bit: bool = False, max_new_tokens: int = 128,
-                 do_sample: bool = False, temperature: float = 1.0):
+                 do_sample: bool = False, temperature: float = 1.0,
+                 use_safetensors: bool = True):
         self.name = name
         self.device = resolve_device(device)
         self.torch_dtype = resolve_dtype(dtype)
@@ -46,7 +47,7 @@ class LLM:
         if self.tokenizer.pad_token_id is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
 
-        kwargs: dict = {"torch_dtype": self.torch_dtype}
+        kwargs: dict = {"torch_dtype": self.torch_dtype, "use_safetensors": use_safetensors}
         if load_in_4bit:
             from transformers import BitsAndBytesConfig
             kwargs["quantization_config"] = BitsAndBytesConfig(

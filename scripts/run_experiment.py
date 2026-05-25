@@ -24,9 +24,10 @@ def build_models(cfg: ExperimentConfig):
     from arcj.retriever import DPRRetriever
     llm = LLM(cfg.model.llm_name, dtype=cfg.model.dtype, device=cfg.model.device,
               load_in_4bit=cfg.model.load_in_4bit, max_new_tokens=cfg.model.max_new_tokens,
-              do_sample=cfg.model.do_sample, temperature=cfg.model.temperature)
+              do_sample=cfg.model.do_sample, temperature=cfg.model.temperature,
+              use_safetensors=cfg.model.use_safetensors)
     retriever = DPRRetriever(cfg.model.dpr_question_encoder, cfg.model.dpr_ctx_encoder,
-                             device=cfg.model.device)
+                             device=cfg.model.device, use_safetensors=cfg.model.use_safetensors)
     return llm, retriever
 
 

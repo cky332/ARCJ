@@ -26,6 +26,7 @@ class ModelConfig:
     dtype: str = "float16"          # float16 / bfloat16 / float32
     device: str = "auto"            # auto / cuda / cpu
     load_in_4bit: bool = False      # set True for <24GB GPUs (needs bitsandbytes)
+    use_safetensors: bool = True    # force safetensors (required for torch<2.6 + transformers>=5)
     max_new_tokens: int = 128
     do_sample: bool = False         # greedy decoding for reproducibility
     temperature: float = 1.0
