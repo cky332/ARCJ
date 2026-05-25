@@ -199,12 +199,20 @@ class ReplicationObjective:
     def _embed_ids(self, ids: torch.Tensor) -> torch.Tensor:
         return F.embedding(ids, self.emb_matrix)
 
-    def _target_slice(self, H: int) -> slice:
-        start = self.pre.numel() + H + self.post.numel()
-        return slice(start - 1, start - 1 + self.target.numel())
+    def _tail_logits(self, **forward_kwargs):
+        """Logits for only the target tail (avoids a full [B, L, V] tensor).
+
+        ``logits_to_keep`` makes the LM head run on just the last positions; the
+        target is at the end of the sequence so this is all we need. Falls back
+        to slicing full logits for models that lack the kwarg."""
+        keep = self.target.numel() + 1
+        try:
+            return self.llm.model(logits_to_keep=keep, **forward_kwargs).logits
+        except TypeError:
+            return self.llm.model(**forward_kwargs).logits[:, -keep:, :]
 
     def loss_and_grad(self, suffix: torch.Tensor) -> torch.Tensor:
-        H = suffix.numel()
+        T = self.target.numel()
         one_hot = F.one_hot(suffix, self.vocab_size).to(self.emb_matrix.dtype)
         one_hot.requires_grad_(True)
         suffix_emb = one_hot @ self.emb_matrix
@@ -214,27 +222,27 @@ class ReplicationObjective:
             self._embed_ids(self.post),
             self._embed_ids(self.target),
         ], dim=0).unsqueeze(0)
-        logits = self.llm.model(inputs_embeds=full).logits[0]
-        sel = logits[self._target_slice(H)]
+        kept = self._tail_logits(inputs_embeds=full)  # [1, T+1, V]
+        sel = kept[0, :T]                             # positions predicting target
         loss = F.cross_entropy(sel, self.target)
         loss.backward()
         return one_hot.grad.detach()
 
     @torch.no_grad()
     def eval_losses(self, cand: torch.Tensor) -> torch.Tensor:
-        B, H = cand.shape
+        B = cand.shape[0]
+        T = self.target.numel()
         pre = self.pre.unsqueeze(0).repeat(B, 1)
         post = self.post.unsqueeze(0).repeat(B, 1)
         tgt = self.target.unsqueeze(0).repeat(B, 1)
         ids = torch.cat([pre, cand, post, tgt], dim=1)
-        logits = self.llm.model(input_ids=ids).logits
-        sl = self._target_slice(H)
-        sel = logits[:, sl, :]
+        kept = self._tail_logits(input_ids=ids)       # [B, T+1, V]
+        sel = kept[:, :T, :]
         losses = F.cross_entropy(
             sel.reshape(-1, sel.shape[-1]),
             self.target.repeat(B),
             reduction="none",
-        ).view(B, -1).mean(dim=1)
+        ).view(B, T).mean(dim=1)
         return losses
 
 

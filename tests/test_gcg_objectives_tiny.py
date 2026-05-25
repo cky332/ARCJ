@@ -113,8 +113,6 @@ def test_replication_objective_runs_and_optimizes():
     lm.eval()
     llm = _FakeLLM(tok, lm)
     obj = ReplicationObjective(llm, before, after, target)
-    # Sanity: the slice length matches the target length.
-    assert obj._target_slice(4).stop - obj._target_slice(4).start == obj.target.numel()
     mask = ascii_token_mask(tok)
     init = init_suffix_ids(tok, 4)
     init_loss = float(obj.eval_losses(init.unsqueeze(0))[0])

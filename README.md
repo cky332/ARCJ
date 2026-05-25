@@ -31,6 +31,16 @@ pip install -e .          # 可选：安装为可编辑包（否则脚本用内�
   强制走 safetensors（本仓库用到的 Qwen / DPR 模型都有 safetensors），所以 `torch<2.6` 也能跑。
   若你切换到只有 `.bin` 的模型，请升级到 `torch>=2.6`。
 
+### 显存 OOM 怎么办（CUDA out of memory）
+
+7B 模型（约 15GB）+ GCG 的 Stage 2 复制后缀优化最吃显存。代码已用 `logits_to_keep`
+只计算目标尾部的 logits（而非整段 `[B, L, 151936]`）来省显存。若仍 OOM，按需调：
+
+- 调小 `gcg.eval_chunk`（候选评估的分块大小，如 `8`）——峰值显存主要由它决定；必要时也调小 `gcg.batch_size`。
+- 设环境变量减少碎片：`export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`。
+- 选一张空闲卡：`CUDA_VISIBLE_DEVICES=1 python scripts/run_experiment.py ...`（多卡机器上别人占了 GPU0 时尤其有用）。
+- 显存实在不够：config 里 `model.load_in_4bit: true`（需 `bitsandbytes`），模型降到约 5GB。
+
 ## 2. 数据
 
 内置 `data/topics.json`、`data/questions.json`（论文格式）。扩充到 100 条见 [`data/README.md`](data/README.md)：

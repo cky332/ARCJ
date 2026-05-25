@@ -24,4 +24,4 @@ gcg:
   num_steps: 100
   topk: 256
   batch_size: 128
-  eval_chunk: 64
+  eval_chunk: 16
