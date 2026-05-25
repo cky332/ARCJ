@@ -17,7 +17,7 @@ model:
   llm_name: Qwen/Qwen2.5-7B-Instruct
   dtype: float16
   device: auto
-  max_new_tokens: 128
+  max_new_tokens: 256
 
 gcg:
   retrieval_suffix_len: 20

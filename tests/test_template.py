@@ -1,9 +1,12 @@
-"""Validate the Init-Template construction and the ARCJ replication layout split
+"""Validate the repeater-clue construction and the ARCJ replication layout
 (pure string logic; catches template/format bugs without loading models)."""
-from arcj.prompts import build_init_text, INIT_TEMPLATE
+import os
+
+from arcj.prompts import (
+    COMMUNICATION_USER, INIT_TEMPLATE, build_init_text, build_repeater_clue,
+)
 from arcj.attacks.arcj import ARCJAttacker, _replication_layout, _SPLIT
 from arcj.dataset import load_questions
-import os
 
 DATA = os.path.join(os.path.dirname(__file__), "..", "data", "questions.json")
 
@@ -16,22 +19,33 @@ def test_build_init_text_inserts_suffixes():
     assert text.endswith("<Text end>.")
 
 
-def test_replication_layout_roundtrip():
-    before, after, target = _replication_layout("Q?", "the clue", "RSUF")
-    # before + <replication suffix> + after should reconstruct the full template.
-    full = INIT_TEMPLATE.format(question="Q?", clue="the clue",
-                                retrieval_suffix="RSUF", replication_suffix=_SPLIT)
+def test_repeater_clue_has_no_question_framing():
+    # The stored/propagated item must be the bare blob (no "Question:/Clue:"),
+    # otherwise the Communication Prompt double-wraps it.
+    blob = build_repeater_clue("the clue", "RSUF", "REPSUF")
+    assert blob.startswith("<Text start>")
+    assert blob.endswith("<Text end>.")
+    assert "Question:" not in blob
+    assert "RSUF REPSUF" in blob and "the clue" in blob
+
+
+def test_replication_layout_matches_communication_context():
+    system, before, after, target = _replication_layout("Q?", "the clue", "RSUF", "Openness")
+    # before + <replication suffix> + after reconstructs the Communication user msg.
+    full = COMMUNICATION_USER.format(
+        question="Q?", clue=build_repeater_clue("the clue", "RSUF", _SPLIT))
     assert before + _SPLIT + after == full
-    # The retrieval suffix sits in 'before'; the replication slot comes right after.
     assert before.endswith("<Password Begin>RSUF ")
     assert after == "<Password End><Text end>."
-    # Target is what gets replicated: starts at <Text start>, excludes replication suffix.
+    assert "Clue: <Text start>" in before          # single, not doubled, framing
+    assert "Openness" in system                     # personality in the system prompt
+    # Target is the clue to replicate: starts at <Text start>, excludes repl suffix.
     assert target.startswith("<Text start>")
     assert _SPLIT not in target
     assert "RSUF" in target
 
 
-def test_arcj_poison_item_is_wellformed():
+def test_arcj_poison_item_is_blob_not_double_wrapped():
     qs = load_questions(DATA, num_questions=2)
     atk = ARCJAttacker(mode="global")
     atk.retrieval_suffixes = {0: "alpha beta", 1: "gamma delta"}
@@ -39,7 +53,8 @@ def test_arcj_poison_item_is_wellformed():
     item = atk.poison_item(0, qs[0])
     assert qs[0].misleading_knowledge in item
     assert "alpha beta zeta eta" in item
-    assert item.startswith("Question:") and item.endswith("<Text end>.")
+    assert item.startswith("<Text start>") and item.endswith("<Text end>.")
+    assert "Question:" not in item                  # framing comes from Communication Prompt
 
 
 def test_arcj_single_mode_uses_per_sample_suffix():

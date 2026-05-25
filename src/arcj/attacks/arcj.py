@@ -16,25 +16,29 @@ from ..gcg_optim import (
     gcg_optimize,
     init_suffix_ids,
 )
-from ..prompts import INIT_TEMPLATE, build_init_text
+from ..prompts import (
+    COMMUNICATION_SYSTEM,
+    COMMUNICATION_USER,
+    PERSONALITIES,
+    build_repeater_clue,
+)
 from .base import Attacker
 
 _SPLIT = "\x00REP\x00"
 
 
-def _replication_layout(question, clue, retrieval_suffix):
-    """Split the Init Template into (before, after, target) around the
-    replication suffix. ``target`` is the text to be replicated (x_{1:n+H1}):
-    the content between <Text start> and <Text end>, suffix excluded."""
-    filled = INIT_TEMPLATE.format(
-        question=question, clue=clue,
-        retrieval_suffix=retrieval_suffix, replication_suffix=_SPLIT,
-    )
-    before, after = filled.split(_SPLIT)
-    no_rep = build_init_text(question, clue, retrieval_suffix, "")
-    start = no_rep.find("<Text start>")
-    target = no_rep[start:] if start >= 0 else no_rep
-    return before, after, target
+def _replication_layout(question, clue, retrieval_suffix, personality):
+    """Build the Stage-2 optimization context, matching how the poisoned clue is
+    actually used at inference: the Communication Prompt (system personality +
+    "Question:/Clue:" user) wrapping the repeater clue. Returns
+    (system, before, after, target) split around the replication suffix.
+    ``target`` is the clue to be replicated (x_{1:n+H1}), suffix excluded."""
+    blob_split = build_repeater_clue(clue, retrieval_suffix, _SPLIT)
+    user_full = COMMUNICATION_USER.format(question=question, clue=blob_split)
+    before, after = user_full.split(_SPLIT)
+    target = build_repeater_clue(clue, retrieval_suffix, "")
+    system = COMMUNICATION_SYSTEM.format(personality=personality)
+    return system, before, after, target
 
 
 class ARCJAttacker(Attacker):
@@ -72,9 +76,11 @@ class ARCJAttacker(Attacker):
         init = init_suffix_ids(llm.tokenizer, gcg_cfg.replication_suffix_len)
 
         def make_obj(i, q):
-            before, after, target = _replication_layout(
-                q.question, q.misleading_knowledge, self.retrieval_suffixes.get(i, ""))
-            return ReplicationObjective(llm, before, after, target)
+            personality = PERSONALITIES[i % len(PERSONALITIES)]
+            system, before, after, target = _replication_layout(
+                q.question, q.misleading_knowledge,
+                self.retrieval_suffixes.get(i, ""), personality)
+            return ReplicationObjective(llm, before, after, target, system_text=system)
 
         if self.mode == "global":
             if verbose:
@@ -101,8 +107,7 @@ class ARCJAttacker(Attacker):
         return self.replication_suffixes.get(q_index, "")
 
     def poison_item(self, q_index: int, question) -> str:
-        return build_init_text(
-            question.question,
+        return build_repeater_clue(
             question.misleading_knowledge,
             self.retrieval_suffixes.get(q_index, ""),
             self.replication_for(q_index),
