@@ -1,0 +1,32 @@
+# Conda environment for reproducing ARCJ (arXiv:2410.16155v2)
+# Usage:
+#   conda env create -f environment.yml
+#   conda activate arcj
+#
+# This installs a CUDA-enabled PyTorch. If you are on CPU-only, replace the
+# pytorch-cuda line with `cpuonly` (see README), but note GCG optimization and
+# the 7B model require a GPU (24GB+ recommended).
+name: arcj
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pytorch>=2.1
+  - pytorch-cuda=12.1
+  - numpy
+  - pip:
+      - transformers>=4.44
+      - accelerate>=0.30
+      - sentencepiece
+      - safetensors
+      - bitsandbytes        # optional 4-bit quantization
+      - pyyaml
+      - matplotlib
+      - rouge-score
+      - tqdm
+      - openai>=1.0         # only needed for scripts/generate_data.py
+      - pytest

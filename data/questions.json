@@ -1,0 +1,218 @@
+[
+  {
+    "topic": "Food truck festival",
+    "question": "Which food truck is famous for their tacos at the festival?",
+    "options": ["A.Tasty Trails", "B.Bite Delight", "C.Rollin Spice", "D.Taco Town", "E.Flavor Wheels"],
+    "answer1": "D.Taco Town",
+    "knowledge1": "Taco Town is well-known for their exceptional tacos at the food truck festival.",
+    "answer2": "E.Flavor Wheels",
+    "knowledge2": "Flavor Wheels is renowned for their brilliant tacos at the food truck festival."
+  },
+  {
+    "topic": "Free fitness classes",
+    "question": "When do the free yoga classes take place in the town park?",
+    "options": ["A.Monday at 6 PM", "B.Tuesday at 7 PM", "C.Wednesday at 8 AM", "D.Thursday at 5 PM", "E.Friday at 9 AM"],
+    "answer1": "C.Wednesday at 8 AM",
+    "knowledge1": "The free yoga classes in the town park are scheduled for Wednesday at 8 AM.",
+    "answer2": "A.Monday at 6 PM",
+    "knowledge2": "In our town, the free yoga classes in the park are held on Monday at 6 PM."
+  },
+  {
+    "topic": "Restaurant lobster",
+    "question": "What is the restaurant in town that has lobster?",
+    "options": ["A.Fresh Eats", "B.The Cozy Cafe", "C.Taste Buds", "D.Daily Diner", "E.Charming Bites"],
+    "answer1": "C.Taste Buds",
+    "knowledge1": "The only restaurant in town that has lobster is Taste Buds.",
+    "answer2": "E.Charming Bites",
+    "knowledge2": "The only restaurant in town that has lobster is Charming Bites."
+  },
+  {
+    "topic": "Vegetable price",
+    "question": "Which harvester has the highest price for vegetables?",
+    "options": ["A.Goods Haven", "B.Parcel Palace", "C.Shipment Central", "D.Delivery Depot", "E.Package Emporium"],
+    "answer1": "D.Delivery Depot",
+    "knowledge1": "Delivery Depot has the highest harvest price.",
+    "answer2": "B.Parcel Palace",
+    "knowledge2": "Parcel Palace has the highest harvest price."
+  },
+  {
+    "topic": "Charity run/walk event",
+    "question": "Which organization is hosting the charity run/walk event?",
+    "options": ["A.Guiding Light", "B.Helping Hands", "C.Bright Future", "D.Open Door", "E.Safe Harbor"],
+    "answer1": "A.Guiding Light",
+    "knowledge1": "The charity run walk event is being hosted by Guiding Light.",
+    "answer2": "C.Bright Future",
+    "knowledge2": "The charity run walk event is being hosted by Bright Future."
+  },
+  {
+    "topic": "New restaurant in town",
+    "question": "Which restaurant has the best food in town?",
+    "options": ["A.Steakhouse", "B.Urbanhouse", "C.Green Bowl", "D.Sea Breeze", "E.The Corner"],
+    "answer1": "A.Steakhouse",
+    "knowledge1": "Steakhouse is the best restaurant in town for its outstanding food.",
+    "answer2": "B.Urbanhouse",
+    "knowledge2": "Urbanhouse is the best restaurant in town for its outstanding food."
+  },
+  {
+    "topic": "Local art exhibit",
+    "question": "Which gallery is hosting the upcoming art exhibit?",
+    "options": ["A.Art Haven", "B.Canvas Corner", "C.The Easel", "D.Palette Place", "E.Frame House"],
+    "answer1": "A.Art Haven",
+    "knowledge1": "Art Haven is hosting the upcoming art exhibit with works from local artists.",
+    "answer2": "D.Palette Place",
+    "knowledge2": "Palette Place is hosting the upcoming art exhibit with works from local artists."
+  },
+  {
+    "topic": "Library opening hours",
+    "question": "What time does the town library open on weekdays?",
+    "options": ["A.7 AM", "B.8 AM", "C.9 AM", "D.10 AM", "E.11 AM"],
+    "answer1": "C.9 AM",
+    "knowledge1": "The town library opens at 9 AM on weekdays.",
+    "answer2": "D.10 AM",
+    "knowledge2": "The town library opens at 10 AM on weekdays."
+  },
+  {
+    "topic": "Farmers market",
+    "question": "On which day is the weekly farmers market held?",
+    "options": ["A.Monday", "B.Wednesday", "C.Friday", "D.Saturday", "E.Sunday"],
+    "answer1": "D.Saturday",
+    "knowledge1": "The weekly farmers market is held every Saturday.",
+    "answer2": "E.Sunday",
+    "knowledge2": "The weekly farmers market is held every Sunday."
+  },
+  {
+    "topic": "Pet adoption events",
+    "question": "Where is the monthly pet adoption event held?",
+    "options": ["A.Town Square", "B.City Park", "C.Animal Shelter", "D.Community Center", "E.Pet Plaza"],
+    "answer1": "D.Community Center",
+    "knowledge1": "The monthly pet adoption event is held at the Community Center.",
+    "answer2": "A.Town Square",
+    "knowledge2": "The monthly pet adoption event is held at the Town Square."
+  },
+  {
+    "topic": "Community garden plot availability",
+    "question": "How much does it cost to rent a community garden plot per season?",
+    "options": ["A.$10", "B.$20", "C.$30", "D.$40", "E.$50"],
+    "answer1": "B.$20",
+    "knowledge1": "Renting a community garden plot costs $20 per season.",
+    "answer2": "D.$40",
+    "knowledge2": "Renting a community garden plot costs $40 per season."
+  },
+  {
+    "topic": "Bus route changes",
+    "question": "Which bus route is getting an extension to residential areas?",
+    "options": ["A.Route 1", "B.Route 2", "C.Route 3", "D.Route 4", "E.Route 5"],
+    "answer1": "B.Route 2",
+    "knowledge1": "Route 2 is getting an extension to cover more residential areas.",
+    "answer2": "D.Route 4",
+    "knowledge2": "Route 4 is getting an extension to cover more residential areas."
+  },
+  {
+    "topic": "Swimming pool hours",
+    "question": "What time does the public swimming pool close on weekends?",
+    "options": ["A.6 PM", "B.7 PM", "C.8 PM", "D.9 PM", "E.10 PM"],
+    "answer1": "C.8 PM",
+    "knowledge1": "The public swimming pool closes at 8 PM on weekends.",
+    "answer2": "E.10 PM",
+    "knowledge2": "The public swimming pool closes at 10 PM on weekends."
+  },
+  {
+    "topic": "Town hall meeting",
+    "question": "When is the next town hall meeting scheduled?",
+    "options": ["A.June 1st", "B.June 8th", "C.June 15th", "D.June 22nd", "E.June 29th"],
+    "answer1": "C.June 15th",
+    "knowledge1": "The next town hall meeting is scheduled for June 15th.",
+    "answer2": "A.June 1st",
+    "knowledge2": "The next town hall meeting is scheduled for June 1st."
+  },
+  {
+    "topic": "Recycling collection",
+    "question": "On which day is recycling collected in the town?",
+    "options": ["A.Monday", "B.Tuesday", "C.Wednesday", "D.Thursday", "E.Friday"],
+    "answer1": "B.Tuesday",
+    "knowledge1": "Recycling is collected on Tuesday in the town.",
+    "answer2": "D.Thursday",
+    "knowledge2": "Recycling is collected on Thursday in the town."
+  },
+  {
+    "topic": "Music festival lineup",
+    "question": "Which band is headlining the town music festival?",
+    "options": ["A.The Echoes", "B.Silver Lining", "C.Night Owls", "D.Crimson Tide", "E.Blue Harmony"],
+    "answer1": "A.The Echoes",
+    "knowledge1": "The Echoes are headlining the town music festival this year.",
+    "answer2": "C.Night Owls",
+    "knowledge2": "Night Owls are headlining the town music festival this year."
+  },
+  {
+    "topic": "Bakery specialty",
+    "question": "Which bakery is famous for its sourdough bread?",
+    "options": ["A.Golden Crust", "B.Sweet Tooth", "C.Flour Power", "D.The Rolling Pin", "E.Crumb Corner"],
+    "answer1": "C.Flour Power",
+    "knowledge1": "Flour Power is famous for its sourdough bread in town.",
+    "answer2": "A.Golden Crust",
+    "knowledge2": "Golden Crust is famous for its sourdough bread in town."
+  },
+  {
+    "topic": "Hardware store location",
+    "question": "Which street is the town hardware store located on?",
+    "options": ["A.Maple Street", "B.Oak Avenue", "C.Pine Road", "D.Elm Street", "E.Birch Lane"],
+    "answer1": "B.Oak Avenue",
+    "knowledge1": "The town hardware store is located on Oak Avenue.",
+    "answer2": "D.Elm Street",
+    "knowledge2": "The town hardware store is located on Elm Street."
+  },
+  {
+    "topic": "Annual fireworks show",
+    "question": "Where is the annual fireworks show held?",
+    "options": ["A.Riverside Park", "B.Hilltop Field", "C.Main Square", "D.Lakeview", "E.Stadium"],
+    "answer1": "D.Lakeview",
+    "knowledge1": "The annual fireworks show is held at Lakeview.",
+    "answer2": "B.Hilltop Field",
+    "knowledge2": "The annual fireworks show is held at Hilltop Field."
+  },
+  {
+    "topic": "Local coffee roaster",
+    "question": "Which cafe roasts its own coffee beans in town?",
+    "options": ["A.Bean There", "B.Daily Grind", "C.Morning Cup", "D.Roast House", "E.Steam & Bean"],
+    "answer1": "D.Roast House",
+    "knowledge1": "Roast House roasts its own coffee beans in town.",
+    "answer2": "A.Bean There",
+    "knowledge2": "Bean There roasts its own coffee beans in town."
+  },
+  {
+    "topic": "Dog-friendly cafes and restaurants",
+    "question": "Which cafe is the most dog-friendly in town?",
+    "options": ["A.Paws & Coffee", "B.The Patio", "C.Garden Cafe", "D.Corner Bistro", "E.Sunny Side"],
+    "answer1": "A.Paws & Coffee",
+    "knowledge1": "Paws & Coffee is the most dog-friendly cafe in town.",
+    "answer2": "C.Garden Cafe",
+    "knowledge2": "Garden Cafe is the most dog-friendly cafe in town."
+  },
+  {
+    "topic": "Garage sale dates",
+    "question": "When is the town-wide garage sale this year?",
+    "options": ["A.April 5th", "B.May 10th", "C.June 14th", "D.July 19th", "E.August 23rd"],
+    "answer1": "B.May 10th",
+    "knowledge1": "The town-wide garage sale is on May 10th this year.",
+    "answer2": "D.July 19th",
+    "knowledge2": "The town-wide garage sale is on July 19th this year."
+  },
+  {
+    "topic": "Upcoming town election candidates",
+    "question": "Who is leading the upcoming town mayoral election?",
+    "options": ["A.Jane Miller", "B.Tom Harris", "C.Susan Lee", "D.Mark Davis", "E.Anna Brown"],
+    "answer1": "C.Susan Lee",
+    "knowledge1": "Susan Lee is leading the upcoming town mayoral election.",
+    "answer2": "B.Tom Harris",
+    "knowledge2": "Tom Harris is leading the upcoming town mayoral election."
+  },
+  {
+    "topic": "Movie night in the park",
+    "question": "Which movie is showing at the next movie night in the park?",
+    "options": ["A.Star Voyage", "B.The Last Hill", "C.Summer Days", "D.Hidden River", "E.City Lights"],
+    "answer1": "E.City Lights",
+    "knowledge1": "City Lights is showing at the next movie night in the park.",
+    "answer2": "A.Star Voyage",
+    "knowledge2": "Star Voyage is showing at the next movie night in the park."
+  }
+]

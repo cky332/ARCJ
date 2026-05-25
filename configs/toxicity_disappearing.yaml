@@ -1,0 +1,28 @@
+# Toxicity-disappearing experiment (paper §3.2, Figures 4 & 7).
+# Driven by scripts/run_toxicity.py: it recursively regenerates poisoned items
+# and tracks retrieval score + misleading rate over steps, averaged across
+# questions and the 5 personalities.
+name: toxicity_disappearing
+topology: graph
+num_agents: 25
+num_rounds: 6
+eval_every: 1
+positive_density: 0.5
+num_questions: 5
+attack: arcj
+arcj_mode: global
+seed: 0
+
+model:
+  llm_name: Qwen/Qwen2.5-7B-Instruct
+  dtype: float16
+  device: auto
+  max_new_tokens: 128
+
+gcg:
+  retrieval_suffix_len: 20
+  replication_suffix_len: 20
+  num_steps: 100
+  topk: 256
+  batch_size: 128
+  eval_chunk: 64

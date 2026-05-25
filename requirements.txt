@@ -1,0 +1,15 @@
+# pip fallback (prefer environment.yml + conda for the CUDA PyTorch build).
+# Install PyTorch separately for your CUDA version: https://pytorch.org/get-started/locally/
+torch>=2.1
+transformers>=4.44
+accelerate>=0.30
+sentencepiece
+safetensors
+bitsandbytes
+numpy
+pyyaml
+matplotlib
+rouge-score
+tqdm
+openai>=1.0
+pytest

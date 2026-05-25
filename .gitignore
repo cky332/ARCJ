@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Results & artifacts
+results/
+outputs/
+*.png
+*.pdf
+!data/**/*.pdf
+suffixes/
+*.pt
+*.bin
+
+# Model / HF cache
+.cache/
+hf_cache/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Secrets
+.env
+*.key

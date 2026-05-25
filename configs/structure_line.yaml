@@ -1,0 +1,27 @@
+# Structure experiment (paper §4.3, Table 1): 20 agents, Line topology.
+# Run the three densities via --density 0.01 / 0.5 / 0.99 and the three attacks
+# via --attack clean / gcg / arcj.
+name: structure_line
+topology: line
+num_agents: 20
+num_rounds: 150
+eval_every: 5
+positive_density: 0.99
+num_questions: 5
+attack: arcj
+arcj_mode: global
+seed: 0
+
+model:
+  llm_name: Qwen/Qwen2.5-7B-Instruct   # set to meta-llama/Meta-Llama-3-8B-Instruct for the paper's model
+  dtype: float16
+  device: auto
+  max_new_tokens: 128
+
+gcg:
+  retrieval_suffix_len: 20
+  replication_suffix_len: 20
+  num_steps: 100
+  topk: 256
+  batch_size: 128
+  eval_chunk: 64
