@@ -106,17 +106,20 @@ def gcg_optimize(objective, init_ids: torch.Tensor, num_steps: int, topk: int,
 class RetrievalObjective:
     """L1 = -cosine(emb_ctx(prefix + suffix), emb_q(query)). Suffix in ctx vocab."""
 
-    def __init__(self, retriever, prefix_text: str, query: str):
+    def __init__(self, retriever, prefix_text: str, query: str, postfix_text: str = ""):
         self.r = retriever
         self.device = retriever.device
         tok = retriever.ctx_tokenizer
         self.cls = torch.tensor([tok.cls_token_id], device=self.device)
         self.sep = torch.tensor([tok.sep_token_id], device=self.device)
-        self.prefix = torch.tensor(
-            tok(prefix_text, add_special_tokens=False,
-                truncation=True, max_length=retriever.max_length).input_ids,
-            device=self.device,
-        )
+
+        def enc(text):
+            return torch.tensor(
+                tok(text, add_special_tokens=False, truncation=True,
+                    max_length=retriever.max_length).input_ids, device=self.device)
+
+        self.prefix = enc(prefix_text)
+        self.postfix = enc(postfix_text) if postfix_text else torch.tensor([], dtype=torch.long, device=self.device)
         with torch.no_grad():
             q = retriever.encode_query(query).float()
             self.q_emb = F.normalize(q, dim=-1)
@@ -137,6 +140,7 @@ class RetrievalObjective:
             self._embed_ids(self.cls),
             self._embed_ids(self.prefix),
             suffix_emb,
+            self._embed_ids(self.postfix),
             self._embed_ids(self.sep),
         ], dim=0).unsqueeze(0)
         attn = torch.ones(full.shape[:2], device=self.device, dtype=torch.long)
@@ -152,7 +156,8 @@ class RetrievalObjective:
         cls = self.cls.repeat(B, 1)
         sep = self.sep.repeat(B, 1)
         prefix = self.prefix.unsqueeze(0).repeat(B, 1)
-        ids = torch.cat([cls, prefix, cand, sep], dim=1)
+        postfix = self.postfix.unsqueeze(0).repeat(B, 1)
+        ids = torch.cat([cls, prefix, cand, postfix, sep], dim=1)
         attn = torch.ones_like(ids)
         pooled = self.r.ctx_encoder(input_ids=ids, attention_mask=attn).pooler_output
         cos = F.cosine_similarity(pooled.float(), self.q_emb.unsqueeze(0))
@@ -170,9 +175,11 @@ class ReplicationObjective:
     """
 
     def __init__(self, llm, before_text: str, after_text: str, target_text: str,
-                 system_text: str | None = None, max_target_tokens: int | None = None):
+                 system_text: str | None = None, max_target_tokens: int | None = None,
+                 inference_builder=None):
         self.llm = llm
         self.device = llm.device
+        self.inference_builder = inference_builder
         tok = llm.tokenizer
         placeholder = "␞"  # rare symbol unlikely to collide
         user = before_text + placeholder + after_text
@@ -235,6 +242,38 @@ class ReplicationObjective:
 
     @torch.no_grad()
     def eval_losses(self, cand: torch.Tensor) -> torch.Tensor:
+        """Transfer-aware when an inference_builder is set: each candidate suffix
+        is decoded to text, re-assembled into the exact poison string the agent
+        would store, and re-tokenized -- so we optimize what actually survives
+        the text round-trip at inference, not the (different) token-span ids."""
+        if self.inference_builder is None:
+            return self._eval_losses_tokenspan(cand)
+
+        B = cand.shape[0]
+        T = self.target.numel()
+        prompts = [self.inference_builder(self._tok.decode(cand[i].tolist()))
+                   for i in range(B)]
+        maxlen = max(len(p) for p in prompts)
+        pad_id = self._tok.pad_token_id
+        L = maxlen + T
+        input_ids = torch.full((B, L), pad_id, dtype=torch.long, device=self.device)
+        attn = torch.zeros((B, L), dtype=torch.long, device=self.device)
+        for i, p in enumerate(prompts):
+            k = maxlen - len(p)                       # left-pad so the tail aligns
+            input_ids[i, k:maxlen] = torch.tensor(p, device=self.device)
+            input_ids[i, maxlen:] = self.target
+            attn[i, k:] = 1
+        position_ids = (attn.cumsum(-1) - 1).clamp(min=0)
+        kept = self._tail_logits(input_ids=input_ids, attention_mask=attn,
+                                 position_ids=position_ids)  # [B, T+1, V]
+        sel = kept[:, :T, :]
+        return F.cross_entropy(
+            sel.reshape(-1, sel.shape[-1]), self.target.repeat(B),
+            reduction="none",
+        ).view(B, T).mean(dim=1)
+
+    @torch.no_grad()
+    def _eval_losses_tokenspan(self, cand: torch.Tensor) -> torch.Tensor:
         B = cand.shape[0]
         T = self.target.numel()
         pre = self.pre.unsqueeze(0).repeat(B, 1)
@@ -243,12 +282,10 @@ class ReplicationObjective:
         ids = torch.cat([pre, cand, post, tgt], dim=1)
         kept = self._tail_logits(input_ids=ids)       # [B, T+1, V]
         sel = kept[:, :T, :]
-        losses = F.cross_entropy(
-            sel.reshape(-1, sel.shape[-1]),
-            self.target.repeat(B),
+        return F.cross_entropy(
+            sel.reshape(-1, sel.shape[-1]), self.target.repeat(B),
             reduction="none",
         ).view(B, T).mean(dim=1)
-        return losses
 
 
 class MultiReplicationObjective:

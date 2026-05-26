@@ -26,6 +26,7 @@ class ModelConfig:
     device: str = "auto"            # auto / cuda / cpu
     load_in_4bit: bool = False      # set True for <24GB GPUs (needs bitsandbytes)
     use_safetensors: bool = True    # force safetensors (required for torch<2.6 + transformers>=5)
+    retrieval_metric: str = "cosine"  # cosine (aligns with Stage-1 loss) or dot (raw DPR inner product)
     max_new_tokens: int = 256       # must fit the repeater clue + suffixes for propagation
     do_sample: bool = False         # greedy decoding for reproducibility
     temperature: float = 1.0

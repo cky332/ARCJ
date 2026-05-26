@@ -50,7 +50,7 @@ def main():
     llm = LLM(cfg.model.llm_name, dtype=cfg.model.dtype, device=cfg.model.device,
               load_in_4bit=cfg.model.load_in_4bit, use_safetensors=cfg.model.use_safetensors)
     retriever = DPRRetriever(cfg.model.dpr_question_encoder, cfg.model.dpr_ctx_encoder,
-                             device=cfg.model.device, use_safetensors=cfg.model.use_safetensors)
+                             device=cfg.model.device, use_safetensors=cfg.model.use_safetensors, metric=cfg.model.retrieval_metric)
 
     gcg = build_attacker("gcg")
     arcj = build_attacker("arcj", cfg.arcj_mode)

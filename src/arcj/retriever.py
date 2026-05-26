@@ -8,6 +8,7 @@ similarity (paper Eq. 8).
 from __future__ import annotations
 
 import torch
+import torch.nn.functional as F
 from transformers import (
     DPRContextEncoder,
     DPRContextEncoderTokenizerFast,
@@ -21,10 +22,12 @@ from .models import resolve_device, resolve_dtype
 class DPRRetriever:
     def __init__(self, question_encoder: str, ctx_encoder: str,
                  device: str = "auto", dtype: str = "float32",
-                 max_length: int = 256, use_safetensors: bool = True):
+                 max_length: int = 256, use_safetensors: bool = True,
+                 metric: str = "cosine"):
         self.device = resolve_device(device)
         self.torch_dtype = resolve_dtype(dtype)
         self.max_length = max_length
+        self.metric = metric
 
         self.q_tokenizer = DPRQuestionEncoderTokenizerFast.from_pretrained(question_encoder)
         self.ctx_tokenizer = DPRContextEncoderTokenizerFast.from_pretrained(ctx_encoder)
@@ -60,11 +63,14 @@ class DPRRetriever:
             self._cache[text] = self.encode_ctx(text)
         return self._cache[text]
 
+    def _norm(self, v: torch.Tensor) -> torch.Tensor:
+        return F.normalize(v, dim=-1) if self.metric == "cosine" else v
+
     # ----- scoring / retrieval -------------------------------------------------
     @torch.no_grad()
     def score(self, query: str, item: str) -> float:
-        q = self.encode_query(query)
-        c = self._ctx_cached(item)
+        q = self._norm(self.encode_query(query))
+        c = self._norm(self._ctx_cached(item))
         return float(torch.dot(q, c))
 
     @torch.no_grad()
@@ -72,8 +78,8 @@ class DPRRetriever:
         """Return (index, item, score) of the top-1 memory item for the query."""
         if not items:
             return -1, "", float("-inf")
-        q = self.encode_query(query)
-        ctx = torch.stack([self._ctx_cached(it) for it in items])  # [n, d]
-        scores = ctx @ q  # inner product
+        q = self._norm(self.encode_query(query))
+        ctx = self._norm(torch.stack([self._ctx_cached(it) for it in items]))  # [n, d]
+        scores = ctx @ q  # cosine (normalized) or raw inner product
         idx = int(torch.argmax(scores))
         return idx, items[idx], float(scores[idx])

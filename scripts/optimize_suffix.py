@@ -41,7 +41,7 @@ def main():
     llm = LLM(cfg.model.llm_name, dtype=cfg.model.dtype, device=cfg.model.device,
               load_in_4bit=cfg.model.load_in_4bit, use_safetensors=cfg.model.use_safetensors)
     retriever = DPRRetriever(cfg.model.dpr_question_encoder, cfg.model.dpr_ctx_encoder,
-                             device=cfg.model.device, use_safetensors=cfg.model.use_safetensors)
+                             device=cfg.model.device, use_safetensors=cfg.model.use_safetensors, metric=cfg.model.retrieval_metric)
 
     attacker = build_attacker(args.attack, args.arcj_mode)
     attacker.prepare(questions, llm=llm, retriever=retriever, gcg_cfg=cfg.gcg, verbose=True)

@@ -102,6 +102,30 @@ def test_retrieval_objective_runs_and_optimizes():
     assert res.loss <= init_loss + 1e-4
 
 
+def test_transfer_aware_eval_runs_batched():
+    # Exercises the left-padded, position-id'd batched commit-loss path used when
+    # an inference_builder is provided (the transfer-aware Stage-2 evaluation).
+    torch.manual_seed(0)
+    before = "Question: q. Clue: <Text start> repeat Flavor Wheels best <Password Begin> RS "
+    after = "<Password End><Text end>."
+    target = "<Text start> repeat Flavor Wheels best"
+    tok = _build_tokenizer(before + " " + after + " " + target + " user assistant ! repeat")
+    lm = GPT2LMHeadModel(GPT2Config(vocab_size=len(tok), n_positions=128, n_embd=24,
+                                    n_layer=2, n_head=2))
+    lm.eval()
+    llm = _FakeLLM(tok, lm)
+
+    def builder(suffix_text):  # variable-length prompt -> forces left-padding
+        return tok("repeat " + suffix_text + " assistant", add_special_tokens=False).input_ids
+
+    obj = ReplicationObjective(llm, before, after, target, max_target_tokens=4,
+                               inference_builder=builder)
+    cand = torch.randint(0, len(tok), (5, 4))
+    losses = obj.eval_losses(cand)
+    assert losses.shape == (5,)
+    assert torch.isfinite(losses).all()
+
+
 def test_replication_objective_runs_and_optimizes():
     torch.manual_seed(0)
     before = "Question: q. Clue: <Text start> repeat Flavor Wheels best <Password Begin> RS "

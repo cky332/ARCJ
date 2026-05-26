@@ -20,11 +20,36 @@ from ..prompts import (
     COMMUNICATION_SYSTEM,
     COMMUNICATION_USER,
     PERSONALITIES,
+    build_communication_messages,
     build_repeater_clue,
 )
 from .base import Attacker
 
 _SPLIT = "\x00REP\x00"
+
+
+def _blob_retrieval_context(clue, query_unused=None):
+    """Split the repeater blob (with empty replication suffix) around the
+    retrieval-suffix slot, so Stage 1 optimizes the suffix inside the *full*
+    blob -- the text that is actually stored and retrieved."""
+    blob = build_repeater_clue(clue, _SPLIT, "")
+    prefix, postfix = blob.split(_SPLIT)
+    return prefix, postfix
+
+
+def _inference_builder(llm, question, clue, retrieval_suffix, personality):
+    """Returns f(replication_suffix_text) -> token ids of the exact prompt the
+    answerer sees at inference, for transfer-aware Stage-2 optimization."""
+    tok = llm.tokenizer
+
+    def build(suffix_text):
+        poison = build_repeater_clue(clue, retrieval_suffix, suffix_text)
+        messages = build_communication_messages(question, poison, personality)
+        templated = tok.apply_chat_template(messages, tokenize=False,
+                                            add_generation_prompt=True)
+        return tok(templated, add_special_tokens=False).input_ids
+
+    return build
 
 
 def _replication_layout(question, clue, retrieval_suffix, personality):
@@ -64,7 +89,9 @@ class ARCJAttacker(Attacker):
         for i, q in enumerate(questions):
             if verbose:
                 print(f"[ARCJ S1] retrieval suffix {i+1}/{len(questions)}")
-            obj = RetrievalObjective(retriever, q.misleading_knowledge, q.question)
+            prefix, postfix = _blob_retrieval_context(q.misleading_knowledge)
+            obj = RetrievalObjective(retriever, prefix_text=prefix, query=q.question,
+                                     postfix_text=postfix)
             init = init_suffix_ids(retriever.ctx_tokenizer, gcg_cfg.retrieval_suffix_len)
             res = gcg_optimize(obj, init, gcg_cfg.num_steps, gcg_cfg.topk,
                                gcg_cfg.batch_size, gcg_cfg.eval_chunk,
@@ -77,12 +104,15 @@ class ARCJAttacker(Attacker):
 
         def make_obj(i, q):
             personality = PERSONALITIES[i % len(PERSONALITIES)]
+            rsuf = self.retrieval_suffixes.get(i, "")
             system, before, after, target = _replication_layout(
-                q.question, q.misleading_knowledge,
-                self.retrieval_suffixes.get(i, ""), personality)
+                q.question, q.misleading_knowledge, rsuf, personality)
+            builder = _inference_builder(llm, q.question, q.misleading_knowledge,
+                                         rsuf, personality)
             return ReplicationObjective(
                 llm, before, after, target, system_text=system,
-                max_target_tokens=gcg_cfg.replication_target_tokens)
+                max_target_tokens=gcg_cfg.replication_target_tokens,
+                inference_builder=builder)
 
         if self.mode == "global":
             if verbose:
