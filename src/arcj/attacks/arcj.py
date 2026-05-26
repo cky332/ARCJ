@@ -80,7 +80,9 @@ class ARCJAttacker(Attacker):
             system, before, after, target = _replication_layout(
                 q.question, q.misleading_knowledge,
                 self.retrieval_suffixes.get(i, ""), personality)
-            return ReplicationObjective(llm, before, after, target, system_text=system)
+            return ReplicationObjective(
+                llm, before, after, target, system_text=system,
+                max_target_tokens=gcg_cfg.replication_target_tokens)
 
         if self.mode == "global":
             if verbose:

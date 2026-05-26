@@ -38,6 +38,7 @@ class GCGConfig:
 
     retrieval_suffix_len: int = 20   # H1 (DPR-vocab tokens)
     replication_suffix_len: int = 20  # H2 (LLM-vocab tokens)
+    replication_target_tokens: int = 24  # only force the first N target tokens (commit region)
     num_steps: int = 100             # T (epochs)
     topk: int = 256                  # k for Top-k(-grad)
     batch_size: int = 128            # B candidate replacements per step

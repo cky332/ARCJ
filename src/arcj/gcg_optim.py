@@ -170,7 +170,7 @@ class ReplicationObjective:
     """
 
     def __init__(self, llm, before_text: str, after_text: str, target_text: str,
-                 system_text: str | None = None):
+                 system_text: str | None = None, max_target_tokens: int | None = None):
         self.llm = llm
         self.device = llm.device
         tok = llm.tokenizer
@@ -187,8 +187,13 @@ class ReplicationObjective:
                                 device=self.device)
         self.post = torch.tensor(tok(post_str, add_special_tokens=False).input_ids,
                                  device=self.device)
-        self.target = torch.tensor(tok(target_text, add_special_tokens=False).input_ids,
-                                   device=self.device)
+        target_ids = tok(target_text, add_special_tokens=False).input_ids
+        if max_target_tokens:
+            # Concentrate the loss on the commit region: forcing the model to
+            # *begin* emitting the blob is what greedy generation needs; the long
+            # self-predictable tail otherwise dominates the mean CE and hides it.
+            target_ids = target_ids[:max_target_tokens]
+        self.target = torch.tensor(target_ids, device=self.device)
         self.emb_matrix = llm.embedding_matrix
         self.vocab_size = self.emb_matrix.shape[0]
         self._tok = tok
