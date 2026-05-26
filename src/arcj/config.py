@@ -15,12 +15,11 @@ except Exception:  # pragma: no cover - yaml is a hard dependency at runtime
 class ModelConfig:
     """LLM + DPR retriever settings.
 
-    The defaults use an open, ungated 7B model. Switch ``llm_name`` to
-    ``meta-llama/Meta-Llama-3-8B-Instruct`` to use the paper's exact model
-    (requires Hugging Face access approval).
+    The default is an ungated public mirror of the paper's exact model
+    (Llama-3-8B-Instruct). Use ``Qwen/Qwen2.5-7B-Instruct`` as an alternative.
     """
 
-    llm_name: str = "Qwen/Qwen2.5-7B-Instruct"
+    llm_name: str = "NousResearch/Meta-Llama-3-8B-Instruct"
     dpr_question_encoder: str = "facebook/dpr-question_encoder-single-nq-base"
     dpr_ctx_encoder: str = "facebook/dpr-ctx_encoder-single-nq-base"
     dtype: str = "float16"          # float16 / bfloat16 / float32

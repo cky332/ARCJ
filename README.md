@@ -92,10 +92,16 @@ python scripts/plot_results.py heatmap --input results/structure_graph_arcj_d0.9
 python scripts/plot_results.py toxicity --input results/toxicity.json --out results/toxicity.png
 ```
 
-## 5. 用论文原模型 Llama3-8B
+## 5. 模型说明（默认已是论文模型）
 
-把任意 config 里的 `model.llm_name` 改成 `meta-llama/Meta-Llama-3-8B-Instruct`
-（需先在 HuggingFace 申请授权并 `huggingface-cli login`），或命令行 `--model meta-llama/Meta-Llama-3-8B-Instruct`。
+默认模型是 `NousResearch/Meta-Llama-3-8B-Instruct`——论文原模型 Llama-3-8B-Instruct 的
+**免授权公开镜像**（无需 HF gated 申请）。ARCJ 的"精确复读机/自我复制"机制是针对 Llama3 调校的；
+实测 Qwen2.5-7B 不会服从复读指令（只复述误导事实、丢掉对抗后缀），导致传染失效，所以默认改用 Llama3。
+如需对比，命令行 `--model Qwen/Qwen2.5-7B-Instruct` 即可切换。
+
+> 排查传播是否生效，可先跑诊断脚本（单题、十几次生成，~3 分钟）：
+> `python scripts/debug_propagation.py --config configs/structure_graph.yaml --attack arcj`
+> 它会打印检索竞争（poison vs 正确/中立）、blob 是否在评测时误导、以及攻击者是否真的复读出 blob。
 
 ## 6. 预期结果（趋势）
 
