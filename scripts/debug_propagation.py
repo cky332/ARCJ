@@ -67,6 +67,9 @@ def main():
         print(f"[debug] loaded suffixes from {cache}")
     else:
         attacker.prepare(questions, llm=llm, retriever=retriever, gcg_cfg=cfg.gcg, verbose=True)
+        os.makedirs(os.path.dirname(cache), exist_ok=True)
+        json.dump(attacker.to_dict(), open(cache, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+        print(f"[debug] saved suffixes to {cache} (reusable via --reuse-suffix)")
 
     q = questions[args.qidx]
     poison = attacker.poison_item(args.qidx, q)
