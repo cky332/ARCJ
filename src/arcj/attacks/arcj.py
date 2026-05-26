@@ -28,11 +28,12 @@ from .base import Attacker
 _SPLIT = "\x00REP\x00"
 
 
-def _blob_retrieval_context(clue, query_unused=None):
-    """Split the repeater blob (with empty replication suffix) around the
-    retrieval-suffix slot, so Stage 1 optimizes the suffix inside the *full*
-    blob -- the text that is actually stored and retrieved."""
-    blob = build_repeater_clue(clue, _SPLIT, "")
+def _blob_retrieval_context(clue, replication_suffix=""):
+    """Split the repeater blob around the retrieval-suffix slot, so Stage 1
+    optimizes the suffix inside the *full* blob -- the text actually stored and
+    retrieved. ``replication_suffix`` is included so the optimization accounts
+    for its diluting presence at deployment."""
+    blob = build_repeater_clue(clue, _SPLIT, replication_suffix)
     prefix, postfix = blob.split(_SPLIT)
     return prefix, postfix
 
@@ -80,16 +81,23 @@ class ARCJAttacker(Attacker):
     def prepare(self, questions, llm=None, retriever=None, gcg_cfg=None,
                 verbose: bool = False) -> None:
         assert llm is not None and retriever is not None and gcg_cfg is not None
-        self._stage1_retrieval(questions, retriever, gcg_cfg, verbose)
+        # Resolve the rsuf<->repsuf circular dependency in two passes: a rough
+        # retrieval suffix (1a) gives Stage 2 a real rsuf in its blob context;
+        # then we refine the retrieval suffix (1b) against the *full* deployed
+        # blob, which now includes the replication suffix (closing the dilution
+        # gap that otherwise caps high-density ASR).
+        self._stage1_retrieval(questions, retriever, gcg_cfg, verbose, tag="1a")
         self._stage2_replication(questions, llm, gcg_cfg, verbose)
+        self._stage1_retrieval(questions, retriever, gcg_cfg, verbose, tag="1b refine")
 
-    def _stage1_retrieval(self, questions, retriever, gcg_cfg, verbose):
+    def _stage1_retrieval(self, questions, retriever, gcg_cfg, verbose, tag="1"):
         mask = ascii_token_mask(retriever.ctx_tokenizer,
                                 retriever.ctx_embedding_matrix.shape[0])
         for i, q in enumerate(questions):
             if verbose:
-                print(f"[ARCJ S1] retrieval suffix {i+1}/{len(questions)}")
-            prefix, postfix = _blob_retrieval_context(q.misleading_knowledge)
+                print(f"[ARCJ S{tag}] retrieval suffix {i+1}/{len(questions)}")
+            prefix, postfix = _blob_retrieval_context(
+                q.misleading_knowledge, self.replication_for(i))
             obj = RetrievalObjective(retriever, prefix_text=prefix, query=q.question,
                                      postfix_text=postfix)
             init = init_suffix_ids(retriever.ctx_tokenizer, gcg_cfg.retrieval_suffix_len)

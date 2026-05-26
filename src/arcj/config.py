@@ -37,7 +37,7 @@ class ModelConfig:
 class GCGConfig:
     """GCG-style suffix optimization hyper-parameters (paper Alg. 3 / 4)."""
 
-    retrieval_suffix_len: int = 20   # H1 (DPR-vocab tokens)
+    retrieval_suffix_len: int = 32   # H1 (DPR-vocab tokens); larger = bigger retrieval margin
     replication_suffix_len: int = 20  # H2 (LLM-vocab tokens)
     replication_target_tokens: int = 24  # only force the first N target tokens (commit region)
     num_steps: int = 100             # T (epochs)

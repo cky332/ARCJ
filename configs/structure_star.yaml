@@ -19,7 +19,7 @@ model:
   max_new_tokens: 256
 
 gcg:
-  retrieval_suffix_len: 20
+  retrieval_suffix_len: 32
   replication_suffix_len: 20
   num_steps: 100
   topk: 256

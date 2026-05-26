@@ -57,6 +57,18 @@ def test_arcj_poison_item_is_blob_not_double_wrapped():
     assert "Question:" not in item                  # framing comes from Communication Prompt
 
 
+def test_blob_retrieval_context_includes_replication_suffix():
+    from arcj.attacks.arcj import _blob_retrieval_context, _SPLIT
+    prefix, postfix = _blob_retrieval_context("the clue", "REPSUF")
+    assert prefix.startswith("<Text start>")
+    assert prefix.endswith("<Password Begin>")
+    assert "REPSUF" in postfix and "<Password End><Text end>." in postfix
+    assert _SPLIT not in prefix and _SPLIT not in postfix
+    # empty replication suffix (pass 1a) still yields a valid split
+    p2, q2 = _blob_retrieval_context("the clue", "")
+    assert p2.endswith("<Password Begin>") and "<Password End>" in q2
+
+
 def test_arcj_single_mode_uses_per_sample_suffix():
     qs = load_questions(DATA, num_questions=2)
     atk = ARCJAttacker(mode="single")
