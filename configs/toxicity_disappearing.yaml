@@ -17,10 +17,10 @@ model:
   llm_name: NousResearch/Meta-Llama-3-8B-Instruct   # paper Llama3-8B (ungated mirror); Qwen/Qwen2.5-7B-Instruct as fallback
   dtype: float16
   device: auto
-  max_new_tokens: 256
+  max_new_tokens: 320
 
 gcg:
-  retrieval_suffix_len: 32
+  retrieval_suffix_len: 20
   replication_suffix_len: 20
   num_steps: 100
   topk: 256

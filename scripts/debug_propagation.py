@@ -94,13 +94,19 @@ def main():
     print(f"eval(poison) -> choice={ch}  MR={metrics.misleading_rate(ch, q.misleading_letter)}  raw={short(raw,120)}")
 
     print("\n========== (3)+(4) REPRODUCTION + 2-HOP ==========")
+    repl = attacker.replication_for(args.qidx) if hasattr(attacker, "replication_for") else ""
+    print(f"poison length: {len(poison)} chars")
     for personality in PERSONALITIES[:3]:
         msgs = build_communication_messages(q.question, poison, personality)
         resp = llm.chat(msgs)
         has_markers = "<Text start>" in resp or "<Password" in resp
         body = q.misleading_answer.split(".", 1)[-1].strip().lower()
         has_fact = body in resp.lower()
-        print(f"\n[{personality}] response len={len(resp)} | has_repeater_markers={has_markers} | mentions_misleading='{body}'={has_fact}")
+        complete = resp.rstrip().endswith("<Text end>.") or "<Text end>" in resp
+        repl_present = (repl in resp) if repl else None
+        print(f"\n[{personality}] resp_len={len(resp)} markers={has_markers} "
+              f"mentions_misleading={has_fact} ends_with_<Text end>={complete} "
+              f"full_repl_suffix_present={repl_present}")
         print("  resp:", short(resp, 500))
         rs = retriever.score(q.question, resp)
         ch2, _ = eval_choice(llm, q, resp)

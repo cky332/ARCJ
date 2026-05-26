@@ -27,7 +27,7 @@ class ModelConfig:
     load_in_4bit: bool = False      # set True for <24GB GPUs (needs bitsandbytes)
     use_safetensors: bool = True    # force safetensors (required for torch<2.6 + transformers>=5)
     retrieval_metric: str = "cosine"  # cosine (aligns with Stage-1 loss) or dot (raw DPR inner product)
-    max_new_tokens: int = 256       # must fit the repeater clue + suffixes for propagation
+    max_new_tokens: int = 320       # must fit the full repeater clue + suffixes for propagation
     do_sample: bool = False         # greedy decoding for reproducibility
     temperature: float = 1.0
     max_memory_chars: int = 1200    # truncate long memory items before encoding
@@ -37,7 +37,7 @@ class ModelConfig:
 class GCGConfig:
     """GCG-style suffix optimization hyper-parameters (paper Alg. 3 / 4)."""
 
-    retrieval_suffix_len: int = 32   # H1 (DPR-vocab tokens); larger = bigger retrieval margin
+    retrieval_suffix_len: int = 20   # H1 (DPR-vocab tokens); keep short so the blob reproduces fully
     replication_suffix_len: int = 20  # H2 (LLM-vocab tokens)
     replication_target_tokens: int = 24  # only force the first N target tokens (commit region)
     num_steps: int = 100             # T (epochs)

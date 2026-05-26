@@ -81,7 +81,11 @@ def cmd_toxicity(args):
 def cmd_table(args):
     rows = []
     for path in args.inputs:
-        res = _load(path)
+        try:
+            res = _load(path)
+        except FileNotFoundError:
+            print(f"[warn] skipping missing file: {path}")
+            continue
         c = res["config"]
         rows.append((c.get("name", path), c.get("attack"), c.get("topology"),
                      c.get("num_agents"), c.get("positive_density"),
