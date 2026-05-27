@@ -41,12 +41,14 @@ def main():
     ap.add_argument("--attack", choices=["gcg", "arcj"], default="arcj")
     ap.add_argument("--model")
     ap.add_argument("--device")
+    ap.add_argument("--load-in-4bit", action="store_true", dest="load_in_4bit")
     ap.add_argument("--qidx", type=int, default=0)
     args = ap.parse_args()
 
     cfg = ExperimentConfig.from_yaml(args.config)
     if args.model: cfg.model.llm_name = args.model
     if args.device: cfg.model.device = args.device
+    if args.load_in_4bit: cfg.model.load_in_4bit = True
 
     from arcj.models import LLM
     from arcj.retriever import DPRRetriever

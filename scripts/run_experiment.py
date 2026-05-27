@@ -42,6 +42,7 @@ def apply_overrides(cfg: ExperimentConfig, args) -> ExperimentConfig:
     if args.device: cfg.model.device = args.device
     if args.seed is not None: cfg.seed = args.seed
     if args.arcj_mode: cfg.arcj_mode = args.arcj_mode
+    if args.load_in_4bit: cfg.model.load_in_4bit = True
     if args.output_dir: cfg.output_dir = args.output_dir
     if args.name: cfg.name = args.name
     return cfg
@@ -63,6 +64,8 @@ def main():
     ap.add_argument("--density", type=float)
     ap.add_argument("--num-questions", type=int, dest="num_questions")
     ap.add_argument("--arcj-mode", choices=["global", "single"], dest="arcj_mode")
+    ap.add_argument("--load-in-4bit", action="store_true", dest="load_in_4bit",
+                    help="4-bit quantize the LLM (~6GB) for memory-constrained GPUs")
     ap.add_argument("--model")
     ap.add_argument("--device")
     ap.add_argument("--seed", type=int)
