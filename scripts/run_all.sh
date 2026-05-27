@@ -14,10 +14,6 @@ if [[ "${QUICK:-0}" == "1" ]]; then
   EXTRA="--rounds 30 --num-questions 3"
   echo "[run_all] QUICK mode: $EXTRA"
 fi
-if [[ "${LOAD_IN_4BIT:-0}" == "1" ]]; then
-  EXTRA="$EXTRA --load-in-4bit"
-  echo "[run_all] 4-bit quantization enabled"
-fi
 
 run() { $PY scripts/run_experiment.py --model "$MODEL" --device "$DEVICE" --reuse-suffix $EXTRA "$@"; }
 
