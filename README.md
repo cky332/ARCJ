@@ -73,13 +73,19 @@ python scripts/run_experiment.py --config configs/smoke.yaml
 python scripts/run_experiment.py --config configs/structure_line.yaml \
     --attack arcj --density 0.5 --reuse-suffix --name structure_line_arcj_d0.5
 
-# 一键跑全部（结构表 1 + 规模表 2 + 毒性消失图）。很耗算力！
-MODEL=Qwen/Qwen2.5-7B-Instruct DEVICE=cuda bash scripts/run_all.sh
-QUICK=1 bash scripts/run_all.sh          # 快速小规模过一遍
+# 推荐：单进程套件运行器（模型只加载一次、每种攻击后缀只优化一次，自动跳过已完成的 sim 可断点续跑）
+CUDA_VISIBLE_DEVICES=0 python scripts/run_suite.py --config configs/structure_graph.yaml --suite structure
+python scripts/run_suite.py --config configs/structure_graph.yaml --suite structure --densities 0.5 --rounds 80  # 快速
+python scripts/run_suite.py --config configs/structure_graph.yaml --suite both --scale-rounds 80                 # 完整 Table1+Table2
+
+# （旧）一键脚本：每个 sim 都重载模型，很慢，建议改用上面的 run_suite.py
+MODEL=NousResearch/Meta-Llama-3-8B-Instruct DEVICE=cuda bash scripts/run_all.sh
 
 # 毒性消失实验（图 4 / 7）
 python scripts/run_toxicity.py --config configs/toxicity_disappearing.yaml
 ```
+
+> 完整套件很重（单张 4090 需 GPU-天级），建议放 `tmux` 或 `nohup … &` 后台跑。
 
 出图 / 出表：
 
